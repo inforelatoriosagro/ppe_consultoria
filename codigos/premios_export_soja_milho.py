@@ -35,7 +35,7 @@ def _open_sheet():
         print(f"[DEBUG] Falha ao carregar do st.secrets: {e}")
     
     # Fallback para desenvolvimento local (arquivo JSON)
-    BASE_DIR = Path(_file_).resolve().parent.parent
+    BASE_DIR = Path(__file__).resolve().parent.parent
     GSHEETS_KEY_PATH = BASE_DIR / "secrets" / "gsheets-key.json"
     
     if not GSHEETS_KEY_PATH.exists():
