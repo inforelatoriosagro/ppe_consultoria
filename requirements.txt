@@ -1,0 +1,6 @@
+gspread google-auth
+
+--upgrade --no-cache-dir git+https://github.com/rongardF/tvdatafeed.git
+python-dotenv
+openpyxl
+streamlit
