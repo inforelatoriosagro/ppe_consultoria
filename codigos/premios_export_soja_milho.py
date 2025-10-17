@@ -26,20 +26,25 @@ def _open_sheet():
     
     try:
         # Tenta carregar do Streamlit Secrets (Cloud)
-        gsheets_secrets = dict(st.secrets["gsheets"])
-        creds = Credentials.from_service_account_info(gsheets_secrets, scopes=SCOPES)
-    except:
-        # Fallback para desenvolvimento local (arquivo JSON)
-        BASE_DIR = Path(__file__).resolve().parent.parent
-        GSHEETS_KEY_PATH = BASE_DIR / "secrets" / "gsheets-key.json"
-        
-        if not GSHEETS_KEY_PATH.exists():
-            raise FileNotFoundError(
-                f"Credencial não encontrada: {GSHEETS_KEY_PATH}. "
-                f"Coloque o JSON do Service Account nessa pasta ou ajuste o caminho."
-            )
-        creds = Credentials.from_service_account_file(str(GSHEETS_KEY_PATH), scopes=SCOPES)
+        if "gsheets" in st.secrets:
+            gsheets_secrets = dict(st.secrets["gsheets"])
+            creds = Credentials.from_service_account_info(gsheets_secrets, scopes=SCOPES)
+            gc = gspread.authorize(creds)
+            return gc.open_by_key(SHEET_ID)
+    except Exception as e:
+        print(f"[DEBUG] Falha ao carregar do st.secrets: {e}")
     
+    # Fallback para desenvolvimento local (arquivo JSON)
+    BASE_DIR = Path(_file_).resolve().parent.parent
+    GSHEETS_KEY_PATH = BASE_DIR / "secrets" / "gsheets-key.json"
+    
+    if not GSHEETS_KEY_PATH.exists():
+        raise FileNotFoundError(
+            f"Credencial não encontrada: {GSHEETS_KEY_PATH}. "
+            f"Coloque o JSON do Service Account nessa pasta ou ajuste o caminho."
+        )
+    
+    creds = Credentials.from_service_account_file(str(GSHEETS_KEY_PATH), scopes=SCOPES)
     gc = gspread.authorize(creds)
     return gc.open_by_key(SHEET_ID)
 
