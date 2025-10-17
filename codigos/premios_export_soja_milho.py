@@ -15,10 +15,6 @@ SHEET_ID   = "1TxP2D1tH0ACNMfWWdUvV1Dy9KiEdyI2Pj8xagGBx-w8"
 TAB_SOJA   = "soja"
 TAB_MILHO  = "milho"
 
-# Caminho ABSOLUTO para o JSON do Service Account (não quebra mais)
-BASE_DIR = Path(__file__).resolve().parent.parent
-GSHEETS_KEY_PATH = BASE_DIR / "secrets" / "gsheets-key.json"
-
 # Escopos de SOMENTE LEITURA
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets.readonly",
@@ -26,12 +22,24 @@ SCOPES = [
 ]
 
 def _open_sheet():
-    if not GSHEETS_KEY_PATH.exists():
-        raise FileNotFoundError(
-            f"Credencial não encontrada: {GSHEETS_KEY_PATH}. "
-            f"Coloque o JSON do Service Account nessa pasta ou ajuste o caminho."
-        )
-    creds = Credentials.from_service_account_file(str(GSHEETS_KEY_PATH), scopes=SCOPES)
+    import streamlit as st
+    
+    try:
+        # Tenta carregar do Streamlit Secrets (Cloud)
+        gsheets_secrets = dict(st.secrets["gsheets"])
+        creds = Credentials.from_service_account_info(gsheets_secrets, scopes=SCOPES)
+    except:
+        # Fallback para desenvolvimento local (arquivo JSON)
+        BASE_DIR = Path(__file__).resolve().parent.parent
+        GSHEETS_KEY_PATH = BASE_DIR / "secrets" / "gsheets-key.json"
+        
+        if not GSHEETS_KEY_PATH.exists():
+            raise FileNotFoundError(
+                f"Credencial não encontrada: {GSHEETS_KEY_PATH}. "
+                f"Coloque o JSON do Service Account nessa pasta ou ajuste o caminho."
+            )
+        creds = Credentials.from_service_account_file(str(GSHEETS_KEY_PATH), scopes=SCOPES)
+    
     gc = gspread.authorize(creds)
     return gc.open_by_key(SHEET_ID)
 

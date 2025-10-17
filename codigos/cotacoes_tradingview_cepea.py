@@ -11,11 +11,17 @@ import os
 # ---------- B3 Futures ----------
 # cria a sessão autenticada
 
-# Carrega variáveis do arquivo configs/.env de login no trading view
-load_dotenv(dotenv_path=os.path.join("configs", ".env"))
+import streamlit as st
 
-TV_USERNAME = os.getenv("TV_USERNAME")
-TV_PASSWORD = os.getenv("TV_PASSWORD")
+# Tenta carregar do Streamlit Secrets (Cloud) ou .env (local)
+try:
+    TV_USERNAME = st.secrets["TV_USERNAME"]
+    TV_PASSWORD = st.secrets["TV_PASSWORD"]
+except:
+    # Fallback para desenvolvimento local
+    load_dotenv(dotenv_path=os.path.join("configs", ".env"))
+    TV_USERNAME = os.getenv("TV_USERNAME")
+    TV_PASSWORD = os.getenv("TV_PASSWORD")
 
 # Validação simples das credenciais
 if not TV_USERNAME or not TV_PASSWORD:

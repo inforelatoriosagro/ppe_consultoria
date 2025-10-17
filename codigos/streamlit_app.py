@@ -28,14 +28,20 @@ st.set_page_config(
 
 st.sidebar.image(str(LOGO_MAIN))
 
-# Carrega configuração de clientes
-CONFIG_PATH = BASE_DIR / "configs" / "clientes.json"
-
 def load_clientes():
-    if CONFIG_PATH.exists():
-        with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {}
+    try:
+        # Tenta carregar do Streamlit Secrets (Cloud)
+        clientes_dict = {}
+        for cliente_nome in st.secrets["clientes"]:
+            clientes_dict[cliente_nome] = dict(st.secrets["clientes"][cliente_nome])
+        return clientes_dict
+    except:
+        # Fallback para desenvolvimento local (arquivo JSON)
+        CONFIG_PATH = BASE_DIR / "configs" / "clientes.json"
+        if CONFIG_PATH.exists():
+            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return {}
 
 def criar_tabela_sensibilidade(df_ppe, ndf_atual, premio, frete_dom, fobbings, produto):
     """
