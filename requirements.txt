@@ -1,6 +1,6 @@
-gspread google-auth
+gspread
 
---upgrade --no-cache-dir git+https://github.com/rongardF/tvdatafeed.git
+git+https://github.com/rongardF/tvdatafeed.git
 python-dotenv
 openpyxl
 streamlit

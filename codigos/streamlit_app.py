@@ -1,5 +1,6 @@
 #.venv/Scripts/Activate
 # streamlit run codigos/streamlit_app.py
+# pine-consultoria.streamlit.app
 
 import streamlit as st
 import pandas as pd

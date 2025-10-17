@@ -1,0 +1,15 @@
+# Arquivos de credenciais - NÃO enviar para GitHub
+.env
+*.json
+secrets/
+configs/.env
+configs/clientes.json
+
+# Ambiente virtual
+venv/
+.venv/
+
+# Arquivos Python
+_pycache_/
+*.pyc
+*.pyo
