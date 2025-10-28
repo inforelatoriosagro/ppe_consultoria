@@ -11,7 +11,7 @@ import pandas as pd
 
 
 # IDs / abas
-SHEET_ID   = "1ZmGk_mB8_oQ7l_A8XphvN7d5Ye76bYT-"
+SHEET_ID   = "1knL5HUlM7XHXg3GtMA65Rf9RPZDF4IC09lmNlIV3oA4-"
 TAB_SOJA   = "soja"
 TAB_MILHO  = "milho"
 
@@ -57,7 +57,7 @@ def _fix_mes(label: str) -> str:
         'jan':'Jan','fev':'Fev','mar':'Mar','abr':'Abr','mai':'Mai','jun':'Jun',
         'jul':'Jul','ago':'Ago','set':'Set','out':'Out','nov':'Nov','dez':'Dez'
     }
-    m = re.match(r"([A-Za-z]{3,})[\/\s\-]?(\d{2})$", s, flags=re.IGNORECASE)
+    m = re.match(r"([A-Za-z]{3,})[\/\s\-]?(\d{2}|\d{4})$", s, flags=re.IGNORECASE)
     if not m:  # se vier fora do padrão, devolve como está
         return label
     mes_raw, ano2 = m.group(1), m.group(2)
