@@ -13,8 +13,10 @@ from io import BytesIO
 # --- Adiciona Aplicação Streamlit com Google Sheets
 from streamlit_gsheets import GSheetsConnection
 conn = st.connection("gsheets", type=GSheetsConnection)
-df = conn.read(worksheet="Sheet1")
-st.dataframe(df)
+
+df_soja = conn.read(worksheet="soja")
+df_milho = conn.read(worksheet="milho")
+
 
 # Adiciona a pasta 'codigos' ao path para importar módulos
 BASE_DIR = Path(__file__).resolve().parent.parent
