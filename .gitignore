@@ -1,9 +1,13 @@
 # Arquivos de credenciais - NÃO enviar para GitHub
 .env
+*.env
 *.json
-secrets/
+.secrets/
 configs/.env
 configs/clientes.json
+secrets.toml
+secrets/
+.streamlit/secrets.toml
 
 # Ambiente virtual
 venv/
