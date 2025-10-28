@@ -314,6 +314,12 @@ if 'ndf_atual' not in st.session_state:
 # Carrega dados do cliente (se já existirem)
 if 'df_soja' not in st.session_state or 'df_milho' not in st.session_state:
     clientes = load_clientes()
+    
+    # Evita erro quando o cliente não está logado ou definido
+    if st.session_state.get("cliente_nome") is None or st.session_state.cliente_nome not in clientes:
+        st.warning("Selecione e faça login com um cliente válido antes de continuar!")
+        st.stop()  # Interrompe execução aqui até o cliente ser definido
+        
     cliente_data = clientes[st.session_state.cliente_nome]
     output_dir = BASE_DIR / "outputs" / cliente_data["pasta"]
     
