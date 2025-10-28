@@ -4,3 +4,4 @@ git+https://github.com/rongardF/tvdatafeed.git
 python-dotenv
 openpyxl
 streamlit
+oauth2client

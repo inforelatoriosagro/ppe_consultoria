@@ -11,7 +11,7 @@ import pandas as pd
 
 
 # IDs / abas
-SHEET_ID   = "1TxP2D1tH0ACNMfWWdUvV1Dy9KiEdyI2Pj8xagGBx-w8"
+SHEET_ID   = "1ZmGk_mB8_oQ7l_A8XphvN7d5Ye76bYT-"
 TAB_SOJA   = "soja"
 TAB_MILHO  = "milho"
 
