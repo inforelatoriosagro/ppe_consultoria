@@ -15,8 +15,8 @@ import streamlit as st
 
 # Tenta carregar do Streamlit Secrets (Cloud) ou .env (local)
 try:
-    TV_USERNAME = st.secrets["TV_USERNAME"]
-    TV_PASSWORD = st.secrets["TV_PASSWORD"]
+    username = st.secrets["tradingview"]["TV_USERNAME"]
+    password = st.secrets["tradingview"]["TV_PASSWORD"]
 except:
     # Fallback para desenvolvimento local
     load_dotenv(dotenv_path=os.path.join("configs", ".env"))
