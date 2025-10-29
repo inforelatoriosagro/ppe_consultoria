@@ -16,9 +16,11 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 
 df_soja = conn.read(worksheet="soja")
 df_milho = conn.read(worksheet="milho")
+df_ndf = conn.read(worksheet="ndf")
 
 df_soja_limpo, soja_dados = process_soja(df_soja)
 df_milho_limpo, milho_dados = process_milho(df_milho)
+df_ndf_limpo, ndf_vencimentos = process_ndf(df_ndf)
 
 # Adiciona a pasta 'codigos' ao path para importar módulos
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -317,8 +319,10 @@ if st.sidebar.button("🔄 Recalcular PPE", type="primary"):
 
 # Carrega NDF atual (mais recente)
 if 'ndf_atual' not in st.session_state:
-    df_ndf = premios._read_tab_ndf()
-    st.session_state.ndf_atual = float(df_ndf.iloc[0]["NDF"])  # primeiro valor (mais recente)
+    df_ndf = conn.read(worksheet="ndf")
+    df_ndf_limpo, _ = process_ndf(df_ndf)
+    st.session_state.ndf_atual = float(df_ndf_limpo.iloc[0]["NDF"])  # primeiro valor (mais recente)
+
 
 # Carrega dados do cliente (se já existirem)
 if 'df_soja' not in st.session_state or 'df_milho' not in st.session_state:
@@ -467,17 +471,17 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.subheader("💵 NDF Dólar")
-    df_ndf_display = premios._read_tab_ndf()[["Vencimento", "NDF"]]
+    df_ndf_display = df_ndf_limpo[["Vencimento", "NDF"]]
     st.dataframe(df_ndf_display, use_container_width=True, hide_index=True)
 
 with col2:
     st.subheader("🌱 Prêmios Soja")
-    df_premio_soja_display = premios.df_soja[["Mes", "Premio"]].rename(columns={"Mes": "Vencimento"})
+    df_premio_soja_display = df_soja_limpo[["Mes", "Premio"]].rename(columns={"Mes": "Vencimento"})
     st.dataframe(df_premio_soja_display, use_container_width=True, hide_index=True)
 
 with col3:
     st.subheader("🌽 Prêmios Milho")
-    df_premio_milho_display = premios.df_milho[["Mes", "Premio"]].rename(columns={"Mes": "Vencimento"})
+    df_premio_milho_display = df_milho_limpo[["Mes", "Premio"]].rename(columns={"Mes": "Vencimento"})
     st.dataframe(df_premio_milho_display, use_container_width=True, hide_index=True)
 
 # Footer
