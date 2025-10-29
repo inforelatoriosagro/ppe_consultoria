@@ -91,6 +91,18 @@ def process_ndf(df_raw: pd.DataFrame):
 
     df["NDF"] = df["NDF"].apply(_fix_ndf)
     df = df.dropna(subset=["Vencimento", "NDF"]).reset_index(drop=True)
+
+    # converter para formato Out/25, Jan/26 etc.
+    try:
+        df["Vencimento"] = pd.to_datetime(df["Vencimento"]).dt.strftime('%b/%y')
+        # Para português, você pode fazer pós-processamento
+        trad = {'Jan': 'Jan', 'Feb': 'Fev', 'Mar': 'Mar', 'Apr': 'Abr', 'May': 'Mai',
+                'Jun': 'Jun', 'Jul': 'Jul', 'Aug': 'Ago', 'Sep': 'Set', 'Oct': 'Out',
+                'Nov': 'Nov', 'Dec': 'Dez'}
+        df["Vencimento"] = df["Vencimento"].apply(lambda x: trad.get(x[:3], x[:3]) + x[3:])
+    except Exception:
+        pass
+
     ndf_vencimentos = {row["Vencimento"]: float(row["NDF"]) for _, row in df.iterrows()}
     return df, ndf_vencimentos
 
