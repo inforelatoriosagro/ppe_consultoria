@@ -17,7 +17,7 @@ import streamlit as st
 try:
     username = st.secrets["tradingview"]["TV_USERNAME"]
     password = st.secrets["tradingview"]["TV_PASSWORD"]
-except:
+except Exception:
     # Fallback para desenvolvimento local
     load_dotenv(dotenv_path=os.path.join("configs", ".env"))
     TV_USERNAME = os.getenv("TV_USERNAME")
@@ -26,6 +26,7 @@ except:
 # Validação simples das credenciais
 if not TV_USERNAME or not TV_PASSWORD:
     raise RuntimeError("Credenciais do TradingView não encontradas. Preencha configs/.env com TV_USERNAME e TV_PASSWORD.")
+
 tv = TvDatafeed(username=TV_USERNAME, password=TV_PASSWORD)
 max_attempts = 3
 delay = 2
