@@ -15,8 +15,8 @@ import streamlit as st
 
 # Tenta carregar do Streamlit Secrets (Cloud) ou .env (local)
 try:
-    username = st.secrets["tradingview"]["TV_USERNAME"]
-    password = st.secrets["tradingview"]["TV_PASSWORD"]
+    TV_USERNAME = st.secrets["tradingview"]["TV_USERNAME"]
+    TV_PASSWORD = st.secrets["tradingview"]["TV_PASSWORD"]
 except Exception:
     # Fallback para desenvolvimento local
     load_dotenv(dotenv_path=os.path.join("configs", ".env"))
@@ -30,6 +30,7 @@ if not TV_USERNAME or not TV_PASSWORD:
 tv = TvDatafeed(username=TV_USERNAME, password=TV_PASSWORD)
 max_attempts = 3
 delay = 2
+
 def fetch_b3(symbol):
     for _ in range(max_attempts):
         try:
