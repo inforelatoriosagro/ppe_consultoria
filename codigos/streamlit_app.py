@@ -9,14 +9,7 @@ from pathlib import Path
 import sys
 from io import BytesIO
 
-# --- Leitura secrets Streamlit ---
-GSHEETS_KEY_PATH = st.secrets["gsheets_key_path"]
-
-if not GSHEETS_KEY_PATH:
-    raise RuntimeError("Caminho da credencial do Google Sheets não encontrado em secrets.toml.")
-
-
-# --- Adiciona Aplicação Streamlit com Google Sheets
+# Conexão com o Google Sheets via Streamlit GSheets
 from streamlit_gsheets import GSheetsConnection
 conn = st.connection("gsheets", type=GSheetsConnection)
 
