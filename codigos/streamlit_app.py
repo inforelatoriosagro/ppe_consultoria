@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import sys
 from io import BytesIO
+from premios_export_soja_milho import process_soja, process_milho, process_ndf
 
 # Conexão com o Google Sheets via Streamlit GSheets
 from streamlit_gsheets import GSheetsConnection
@@ -15,7 +16,11 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 
 df_soja = conn.read(worksheet="soja")
 df_milho = conn.read(worksheet="milho")
+df_ndf = conn.read(worksheet="ndf")
 
+df_soja_limpo, soja_dados = process_soja(df_soja)
+df_milho_limpo, milho_dados = process_milho(df_milho)
+df_ndf_limpo, ndf_vencimentos = process_ndf(df_ndf)
 
 # Adiciona a pasta 'codigos' ao path para importar módulos
 BASE_DIR = Path(__file__).resolve().parent.parent

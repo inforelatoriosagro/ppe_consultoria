@@ -1,52 +1,13 @@
 # =================================================================================
-# ========================== PRÊMIOS DE EXPORTAÇÃO ================================
+# ======================= PRÊMIOS DE EXPORTAÇÃO (refatorado) =====================
 # =================================================================================
 
-# ==== Google Sheets: leitura robusta (somente leitura) ====
-from pathlib import Path
-import re
-import gspread
-from google.oauth2.service_account import Credentials
 import pandas as pd
+import re
 
-
-# IDs / abas
-SHEET_ID   = "1knL5HUlM7XHXg3GtMA65Rf9RPZDF4IC09lmNlIV3oA4"
 TAB_SOJA   = "soja"
 TAB_MILHO  = "milho"
-
-# Escopos de SOMENTE LEITURA
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets.readonly",
-    "https://www.googleapis.com/auth/drive.readonly",
-]
-
-def _open_sheet():
-    import streamlit as st
-    
-    try:
-        # Tenta carregar do Streamlit Secrets (Cloud)
-        if "gsheets" in st.secrets:
-            gsheets_secrets = dict(st.secrets["gsheets"])
-            creds = Credentials.from_service_account_info(gsheets_secrets, scopes=SCOPES)
-            gc = gspread.authorize(creds)
-            return gc.open_by_key(SHEET_ID)
-    except Exception as e:
-        print(f"[DEBUG] Falha ao carregar do st.secrets: {e}")
-    
-    # Fallback para desenvolvimento local (arquivo JSON)
-    BASE_DIR = Path(__file__).resolve().parent.parent
-    GSHEETS_KEY_PATH = BASE_DIR / "secrets" / "gsheets-key.json"
-    
-    if not GSHEETS_KEY_PATH.exists():
-        raise FileNotFoundError(
-            f"Credencial não encontrada: {GSHEETS_KEY_PATH}. "
-            f"Coloque o JSON do Service Account nessa pasta ou ajuste o caminho."
-        )
-    
-    creds = Credentials.from_service_account_file(str(GSHEETS_KEY_PATH), scopes=SCOPES)
-    gc = gspread.authorize(creds)
-    return gc.open_by_key(SHEET_ID)
+TAB_NDF    = "ndf"
 
 def _fix_mes(label: str) -> str:
     """Converte 'ago./25' -> 'Ago/25' e padroniza 3 letras."""
@@ -87,61 +48,35 @@ def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
     df = df.dropna(subset=["Mes", "Premio"]).reset_index(drop=True)
     return df
 
-def _read_tab(tab: str) -> pd.DataFrame:
-    try:
-        sh = _open_sheet()
-        ws = sh.worksheet(tab)
-        rows = ws.get_all_records()  # usa cabeçalho da linha 1
-        return _clean_df(pd.DataFrame(rows))
-    except gspread.exceptions.APIError as e:
-        # Mensagem amigável para 403
-        if "403" in str(e):
-            raise PermissionError(
-                "Permissão insuficiente no Google Sheets. "
-                "Abra o arquivo 'secrets/gsheets-key.json', copie o 'client_email' "
-                "e compartilhe a planilha 'premios_exportacao' com esse e‑mail como EDITOR."
-            ) from e
-        raise
+def process_soja(df_raw: pd.DataFrame):
+    df = _clean_df(df_raw)
+    soja_dados = {
+        "Mês": df["Mes"].tolist(),
+        "Prêmio": df["Premio"].astype(int).tolist()
+    }
+    return df, soja_dados
 
-# >>> CARGA EFETIVA <<<
-df_soja  = _read_tab(TAB_SOJA)
-df_milho = _read_tab(TAB_MILHO)
+def process_milho(df_raw: pd.DataFrame):
+    df = _clean_df(df_raw)
+    milho_dados = {
+        "Mês": df["Mes"].tolist(),
+        "Prêmio": df["Premio"].astype(int).tolist()
+    }
+    return df, milho_dados
 
-# Se o seu app ainda usa dicionários:
-soja_dados  = {"Mês": df_soja["Mes"].tolist(),  "Prêmio": df_soja["Premio"].astype(int).tolist()}
-milho_dados = {"Mês": df_milho["Mes"].tolist(), "Prêmio": df_milho["Premio"].astype(int).tolist()}
-
-print("Prêmios de exportação: Soja (c$/bu):")
-print(df_soja)
-print("Prêmios de exportação:Milho (c$/bu):")
-print(df_milho)
-
-# =================================================================================
-# ========================== NDF (Google Sheets) ==================================
-# =================================================================================
-
-def _read_tab_ndf() -> pd.DataFrame:
-    """Lê aba 'ndf' com colunas: Vencimento (texto 'Mês/AAAA') e NDF (número)."""
-    sh = _open_sheet()  # usa a mesma função que você já tem para abrir a planilha
-    ws = sh.worksheet("ndf")
-    rows = ws.get_all_records()
-    df = pd.DataFrame(rows)
-
-    # padroniza nomes
+def process_ndf(df_raw: pd.DataFrame):
+    if df_raw.empty:
+        return df_raw, {}
+    df = df_raw.copy()
     df.columns = [c.strip() for c in df.columns]
     ren = {}
     for c in df.columns:
         if c.lower() == "vencimento": ren[c] = "Vencimento"
         if c.lower() == "ndf": ren[c] = "NDF"
     df = df.rename(columns=ren)
-
-    # mantém só as colunas relevantes
     df = df[["Vencimento", "NDF"]].copy()
 
-    # --- PATCH SIMPLES: corrige vírgula/escala independentemente de como o Sheets entregou ---
-    import re
     def _fix_ndf(v):
-        # 1) tenta respeitar vírgula caso venha como string
         try:
             v_str = str(v).strip().replace(' ', '').replace(',', '.')
             v = float(v_str)
@@ -150,24 +85,14 @@ def _read_tab_ndf() -> pd.DataFrame:
                 v = float(v)
             except Exception:
                 return pd.NA
-
-        # 2) guarda de escala: se veio 54, 543, 804 etc., traz para 5.4, 5.43, 8.04
         while v >= 20:
             v /= 10.0
-
         return round(v, 2)
 
     df["NDF"] = df["NDF"].apply(_fix_ndf)
-    # -----------------------------------------------------------------------------------------
-
     df = df.dropna(subset=["Vencimento", "NDF"]).reset_index(drop=True)
-    return df
-
-df_ndf = _read_tab_ndf()
-ndf_vencimentos = {row["Vencimento"]: float(row["NDF"]) for _, row in df_ndf.iterrows()}
-print("NDF (topo):")
-print(df_ndf)
-
+    ndf_vencimentos = {row["Vencimento"]: float(row["NDF"]) for _, row in df.iterrows()}
+    return df, ndf_vencimentos
 
 
 #=======================================================================================#
