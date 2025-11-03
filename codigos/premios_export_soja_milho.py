@@ -29,11 +29,20 @@ def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
     df = df.copy()
-    df.columns = [c.strip() for c in df.columns]
+    # Remove espaços, coloca minúsculo e remove acento
+    df.columns = [
+        c.strip()
+         .lower()
+         .replace("ú", "u").replace("í", "i").replace("é", "e")
+         .replace("ó", "o").replace("â", "a").replace("ã", "a")
+         .replace("ç", "c") for c in df.columns
+    ]
     ren = {}
     for c in df.columns:
-        if c.lower() == "mes": ren[c] = "Mes"
-        if c.lower() == "premio": ren[c] = "Premio"
+        if c == "mes":
+            ren[c] = "Mes"
+        if c in ["premio", "premio"]:  # agora cobre 'Premio', 'Prêmio'
+            ren[c] = "Premio"
     df = df.rename(columns=ren)
     df = df[["Mes", "Premio"]]
 
