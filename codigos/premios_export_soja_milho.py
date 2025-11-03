@@ -29,29 +29,31 @@ def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
     df = df.copy()
-    # Remove espaços, coloca minúsculo e remove acento
+    # Padroniza: tira espaços, minúsculo, remove acentos comuns
     df.columns = [
         c.strip()
          .lower()
-         .replace("ú", "u").replace("í", "i").replace("é", "e")
-         .replace("ó", "o").replace("â", "a").replace("ã", "a")
-         .replace("ç", "c") for c in df.columns
+         .replace("ã","a").replace("í","i").replace("é","e").replace("ê","e")
+         .replace("ó","o").replace("ô","o").replace("ú","u")
+         .replace("ç","c") for c in df.columns
     ]
     ren = {}
     for c in df.columns:
         if c == "mes":
             ren[c] = "Mes"
-        if c in ["premio", "premio"]:  # agora cobre 'Premio', 'Prêmio'
+        # pega qualquer 'premio' e também 'premio' que veio de 'prêmio'
+        if c == "premio":
             ren[c] = "Premio"
     df = df.rename(columns=ren)
+
     df = df[["Mes", "Premio"]]
 
     df["Mes"] = df["Mes"].astype(str).apply(_fix_mes)
     df["Premio"] = (
         df["Premio"].astype(str)
-        .str.replace("+", "", regex=False)
-        .str.replace(",", ".", regex=False)
-        .str.strip()
+        .replace("+", "", regex=False)
+        .replace(",", ".", regex=False)
+        .strip()
     )
     df["Premio"] = pd.to_numeric(df["Premio"], errors="coerce")
     df = df.dropna(subset=["Mes", "Premio"]).reset_index(drop=True)
@@ -127,7 +129,6 @@ def process_ndf(df_raw: pd.DataFrame):
 
     ndf_vencimentos = {row["Vencimento"]: float(row["NDF"]) for _, row in df.iterrows()}
     return df, ndf_vencimentos
-
 
 
 #=======================================================================================#
