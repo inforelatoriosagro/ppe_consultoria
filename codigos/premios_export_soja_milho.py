@@ -10,7 +10,6 @@ TAB_MILHO  = "milho"
 TAB_NDF    = "ndf"
 
 def _fix_mes(label: str) -> str:
-    """Converte 'ago./25' -> 'Ago/25' e padroniza 3 letras."""
     if not isinstance(label, str):
         return label
     s = re.sub(r"\.", "", label.strip())
@@ -19,7 +18,7 @@ def _fix_mes(label: str) -> str:
         'jul':'Jul','ago':'Ago','set':'Set','out':'Out','nov':'Nov','dez':'Dez'
     }
     m = re.match(r"([A-Za-z]{3,})[\/\s\-]?(\d{2}|\d{4})$", s, flags=re.IGNORECASE)
-    if not m:  # se vier fora do padrão, devolve como está
+    if not m:
         return label
     mes_raw, ano2 = m.group(1), m.group(2)
     mes = mapa.get(mes_raw.lower()[:3], mes_raw.title()[:3])
@@ -76,8 +75,6 @@ def process_ndf(df_raw: pd.DataFrame):
         return df_raw, {}
     
     df = df_raw.copy()
-    
-    # Normaliza nomes das colunas: tira espaços, coloca em minúsculas e remove acentos
     df.columns = [
         c.strip()
          .lower()
@@ -92,9 +89,6 @@ def process_ndf(df_raw: pd.DataFrame):
         if c in ["ndf", "ultimo"]:
             ren[c] = "NDF"
     df = df.rename(columns=ren)
-    
-    print("Colunas após renomeação (debug):", df.columns)  # pode remover após testar
-    
     df = df[["Vencimento", "NDF"]].copy()
 
     def _fix_ndf(v):
@@ -113,7 +107,6 @@ def process_ndf(df_raw: pd.DataFrame):
     df["NDF"] = df["NDF"].apply(_fix_ndf)
     df = df.dropna(subset=["Vencimento", "NDF"]).reset_index(drop=True)
 
-    # converter para formato Out/25, Jan/26 etc.
     try:
         df["Vencimento"] = pd.to_datetime(df["Vencimento"]).dt.strftime('%b/%y')
         trad = {'Jan': 'Jan', 'Feb': 'Fev', 'Mar': 'Mar', 'Apr': 'Abr', 'May': 'Mai',
