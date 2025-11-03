@@ -69,16 +69,25 @@ def process_ndf(df_raw: pd.DataFrame):
         return df_raw, {}
     
     df = df_raw.copy()
-    # Padroniza colunas para minúsculas e tira espaços para garantir mapeamento correto
-    df.columns = [c.strip().lower() for c in df.columns]
+    
+    # Normaliza nomes das colunas: tira espaços, coloca em minúsculas e remove acentos
+    df.columns = [
+        c.strip()
+         .lower()
+         .replace("ú", "u").replace("í", "i").replace("é", "e")
+         .replace("ó", "o").replace("â", "a").replace("ã", "a")
+         .replace("ç", "c") for c in df.columns
+    ]
     ren = {}
     for c in df.columns:
         if c == "vencimento":
             ren[c] = "Vencimento"
-        if c == "ndf":
+        if c in ["ndf", "ultimo"]:
             ren[c] = "NDF"
     df = df.rename(columns=ren)
-
+    
+    print("Colunas após renomeação (debug):", df.columns)  # pode remover após testar
+    
     df = df[["Vencimento", "NDF"]].copy()
 
     def _fix_ndf(v):
@@ -100,7 +109,6 @@ def process_ndf(df_raw: pd.DataFrame):
     # converter para formato Out/25, Jan/26 etc.
     try:
         df["Vencimento"] = pd.to_datetime(df["Vencimento"]).dt.strftime('%b/%y')
-        # Para português, você pode fazer pós-processamento
         trad = {'Jan': 'Jan', 'Feb': 'Fev', 'Mar': 'Mar', 'Apr': 'Abr', 'May': 'Mai',
                 'Jun': 'Jun', 'Jul': 'Jul', 'Aug': 'Ago', 'Sep': 'Set', 'Oct': 'Out',
                 'Nov': 'Nov', 'Dec': 'Dez'}
@@ -110,6 +118,7 @@ def process_ndf(df_raw: pd.DataFrame):
 
     ndf_vencimentos = {row["Vencimento"]: float(row["NDF"]) for _, row in df.iterrows()}
     return df, ndf_vencimentos
+
 
 
 #=======================================================================================#
