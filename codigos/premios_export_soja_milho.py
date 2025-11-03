@@ -67,13 +67,18 @@ def process_milho(df_raw: pd.DataFrame):
 def process_ndf(df_raw: pd.DataFrame):
     if df_raw.empty:
         return df_raw, {}
+    
     df = df_raw.copy()
-    df.columns = [c.strip() for c in df.columns]
+    # Padroniza colunas para minúsculas e tira espaços para garantir mapeamento correto
+    df.columns = [c.strip().lower() for c in df.columns]
     ren = {}
     for c in df.columns:
-        if c.lower() == "vencimento": ren[c] = "Vencimento"
-        if c.lower() == "ndf": ren[c] = "NDF"
+        if c == "vencimento":
+            ren[c] = "Vencimento"
+        if c == "ndf":
+            ren[c] = "NDF"
     df = df.rename(columns=ren)
+
     df = df[["Vencimento", "NDF"]].copy()
 
     def _fix_ndf(v):
