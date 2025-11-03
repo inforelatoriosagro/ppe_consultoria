@@ -29,7 +29,6 @@ def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
     df = df.copy()
-    # Padroniza: tira espaços, minúsculo, remove acentos comuns
     df.columns = [
         c.strip()
          .lower()
@@ -41,19 +40,16 @@ def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
     for c in df.columns:
         if c == "mes":
             ren[c] = "Mes"
-        # pega qualquer 'premio' e também 'premio' que veio de 'prêmio'
         if c == "premio":
             ren[c] = "Premio"
     df = df.rename(columns=ren)
-
     df = df[["Mes", "Premio"]]
-
     df["Mes"] = df["Mes"].astype(str).apply(_fix_mes)
     df["Premio"] = (
         df["Premio"].astype(str)
-        .replace("+", "", regex=False)
-        .replace(",", ".", regex=False)
-        .strip()
+        .str.replace("+", "", regex=False)
+        .str.replace(",", ".", regex=False)
+        .str.strip()
     )
     df["Premio"] = pd.to_numeric(df["Premio"], errors="coerce")
     df = df.dropna(subset=["Mes", "Premio"]).reset_index(drop=True)
