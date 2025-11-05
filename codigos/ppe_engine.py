@@ -210,8 +210,8 @@ def calcular_ppe(df_soja, df_milho, fobbings=40.0, frete_dom=342.0):
     df_ppe_milho = df_zc[["Ativo", "Vencimento", "Preço"]].copy()
     
     # --- Adiciona Prêmios ---
-    df_premio_soja = premios.df_soja.copy()
-    df_premio_milho = premios.df_milho.copy()
+    df_premio_soja = df_soja.copy()
+    df_premio_milho = df_milho.copy()
     
     df_premio_soja[["Ano", "MesNum"]] = df_premio_soja["Mes"].apply(lambda s: pd.Series(_parse_mes_pt(s)))
     df_premio_milho[["Ano", "MesNum"]] = df_premio_milho["Mes"].apply(lambda s: pd.Series(_parse_mes_pt(s)))
