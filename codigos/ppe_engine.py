@@ -167,7 +167,7 @@ def _parse_ndf_venc(label: str):
     m = _MES_PT3_TO_NUM[mes3]
     return y, m
 
-def calcular_ppe(fobbings=40.0, frete_dom=342.0):
+def calcular_ppe(df_soja, df_milho, fobbings=40.0, frete_dom=342.0):
     """
     Função principal que executa todo o cálculo do PPE
     

@@ -8,19 +8,29 @@ import json
 from pathlib import Path
 import sys
 from io import BytesIO
-from premios_export_soja_milho import process_soja, process_milho, process_ndf
 
 # Conexão com o Google Sheets via Streamlit GSheets
 from streamlit_gsheets import GSheetsConnection
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-df_soja = conn.read(worksheet="soja")
-df_milho = conn.read(worksheet="milho")
-df_ndf = conn.read(worksheet="ndf")
+# 1. Carregar dados brutos da planilha
+df_soja_bruto = conn.read(worksheet="soja")
+df_milho_bruto = conn.read(worksheet="milho")
+df_ndf_bruto = conn.read(worksheet="ndf")
 
-df_soja_limpo, soja_dados = process_soja(df_soja)
-df_milho_limpo, milho_dados = process_milho(df_milho)
-df_ndf_limpo, ndf_vencimentos = process_ndf(df_ndf)
+# 2. Limpar/processar os dados brutos usando funções do módulo
+from premios_export_soja_milho import process_soja, process_milho, process_ndf
+df_soja_limpo, _ = process_soja(df_soja_bruto)
+df_milho_limpo, _ = process_milho(df_milho_bruto)
+df_ndf_limpo, _ = process_ndf(df_ndf_bruto)
+
+# 3. Passar estes dataframes limpos para o motor/calculadora:
+df_soja_final, df_milho_final = ppe_engine.calcular_ppe(
+    df_soja_limpo,
+    df_milho_limpo,
+    fobbings,
+    frete_dom
+)
 
 # Adiciona a pasta 'codigos' ao path para importar módulos
 BASE_DIR = Path(__file__).resolve().parent.parent
