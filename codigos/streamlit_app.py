@@ -8,6 +8,10 @@ import json
 from pathlib import Path
 import sys
 from io import BytesIO
+import ppe_engine
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR / "codigos"))
 
 # Conexão com o Google Sheets via Streamlit GSheets
 from streamlit_gsheets import GSheetsConnection
