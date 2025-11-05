@@ -28,7 +28,11 @@ df_soja_limpo, _ = process_soja(df_soja_bruto)
 df_milho_limpo, _ = process_milho(df_milho_bruto)
 df_ndf_limpo, _ = process_ndf(df_ndf_bruto)
 
-# 3. Passar estes dataframes limpos para o motor/calculadora:
+# 3. Definir valores default ou pegar do sidebar/interação
+fobbings = 40.0      # ou qualquer valor padrão, ou valor do usuário!
+frete_dom = 342.0    # idem
+
+# 4. Agora pode calcular!
 df_soja_final, df_milho_final = ppe_engine.calcular_ppe(
     df_soja_limpo,
     df_milho_limpo,
