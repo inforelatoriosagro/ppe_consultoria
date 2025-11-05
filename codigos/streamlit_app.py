@@ -306,20 +306,18 @@ st.sidebar.markdown("---")
 if st.sidebar.button("🔄 Recalcular PPE", type="primary"):
     with st.spinner("Calculando PPE..."):
         try:
-            # Executa cálculo
             df_soja, df_milho = ppe_engine.calcular_ppe(
+                df_soja_limpo,
+                df_milho_limpo,
+                df_ndf_limpo,
                 fobbings=fobbings,
                 frete_dom=frete_dom
             )
 
-            # Atualiza NDF atual
-            df_ndf = premios._read_tab_ndf()
-            st.session_state.ndf_atual = float(df_ndf.iloc[0]["NDF"])
+            st.session_state.ndf_atual = float(df_ndf_limpo.iloc[0]["NDF"])
             
-            # Salva nos arquivos do cliente
             clientes = load_clientes()
             cliente_data = clientes[st.session_state.cliente_nome]
-            
             output_dir = BASE_DIR / "outputs" / cliente_data["pasta"]
             output_dir.mkdir(parents=True, exist_ok=True)
             
