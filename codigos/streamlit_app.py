@@ -36,6 +36,7 @@ frete_dom = 342.0    # idem
 df_soja_final, df_milho_final = ppe_engine.calcular_ppe(
     df_soja_limpo,
     df_milho_limpo,
+    df_ndf_limpo,
     fobbings,
     frete_dom
 )

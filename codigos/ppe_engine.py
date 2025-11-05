@@ -167,7 +167,7 @@ def _parse_ndf_venc(label: str):
     m = _MES_PT3_TO_NUM[mes3]
     return y, m
 
-def calcular_ppe(df_soja, df_milho, fobbings=40.0, frete_dom=342.0):
+def calcular_ppe(df_soja, df_milho, df_ndf, fobbings=40.0, frete_dom=342.0):
     """
     Função principal que executa todo o cálculo do PPE
     
@@ -212,6 +212,7 @@ def calcular_ppe(df_soja, df_milho, fobbings=40.0, frete_dom=342.0):
     # --- Adiciona Prêmios ---
     df_premio_soja = df_soja.copy()
     df_premio_milho = df_milho.copy()
+    df_ndf = df_ndf.copy()
     
     df_premio_soja[["Ano", "MesNum"]] = df_premio_soja["Mes"].apply(lambda s: pd.Series(_parse_mes_pt(s)))
     df_premio_milho[["Ano", "MesNum"]] = df_premio_milho["Mes"].apply(lambda s: pd.Series(_parse_mes_pt(s)))
