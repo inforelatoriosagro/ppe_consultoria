@@ -254,7 +254,7 @@ def calcular_ppe(df_soja, df_milho, df_ndf, fobbings=40.0, frete_dom=342.0):
     df_ppe_milho["PremioData"] = premios_milho_src
     
     # --- Adiciona NDF ---
-    df_ndf = premios._read_tab_ndf().copy()
+    df_ndf = df_ndf.copy()
     df_ndf[["Ano","MesNum"]] = df_ndf["Vencimento"].apply(lambda s: pd.Series(_parse_ndf_venc(s)))
     df_ndf["Chave"] = df_ndf["MesNum"].astype(int).map(lambda x: f"{x:02d}") + "/" + df_ndf["Ano"].astype(int).astype(str)
     ndf_sorted = df_ndf.sort_values(["Ano","MesNum"]).reset_index(drop=True)
